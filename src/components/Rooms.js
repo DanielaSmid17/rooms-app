@@ -4,45 +4,54 @@ import { Grid, Typography, Snackbar } from '@mui/material';
 import BedIcon from '@mui/icons-material/Bed';
 import User from './User';
 
+export const TypographyStyle = {
+  fontSize: "15px",
+  fontFamily: "Poppins"
+}
+
 export default function Rooms() {
-  const [usersInRoom, setUsersInRoom] = useState([])
-  const [validRoomIds, setValidRoomsIds] = useState([])
-  const [openSnackBar, setOpenSnackBar] = useState(false)
-  const [openRoomSnackBar, setOpenRoomSnackBar] = useState(false)
+  const [usersInRoom, setUsersInRoom] = useState([]);
+  const [validRoomIds, setValidRoomsIds] = useState([]);
+  const [openSnackBar, setOpenSnackBar] = useState(false);
+  const [openRoomSnackBar, setOpenRoomSnackBar] = useState(false);
  
   useEffect(() => {
 
-    fetchData()
+    fetchData();
 
   }, []);
 
+  // fetching data
   const fetchData = async () => {
-    const rooms = await fetchRooms()
-    const users = await fetchUsers()
+    const rooms = await fetchRooms();
+    const users = await fetchUsers();
 
     usersPerRoom(rooms, users)
   }
 
+  
+
   const fetchRooms = async () => {
-    const rooms = await axios.get("https://61f992ba69307000176f7330.mockapi.io/rooms")
-    createRoomsId(rooms?.data)
-    return rooms?.data
+    const rooms = await axios.get("https://61f992ba69307000176f7330.mockapi.io/rooms");
+    createRoomsId(rooms?.data);
+    return rooms?.data;
 
   }
 
+  // Creating validated id rooms
   const createRoomsId = (rooms) => {
     const ids = [];
     for (const room of rooms) {
-      ids.push(room.id)
+      ids.push(room.id);
     }
 
-    setValidRoomsIds(ids)
+    setValidRoomsIds(ids);
 
   }
 
   const fetchUsers = async () => {
-    const users = await axios.get("https://61f992ba69307000176f7330.mockapi.io/users")
-    return users?.data
+    const users = await axios.get("https://61f992ba69307000176f7330.mockapi.io/users");
+    return users?.data;
   }
 
   // configure each room with corresponding users
@@ -54,7 +63,7 @@ export default function Rooms() {
     for (const user of users) {
       for (const room of rooms) {
         if (room.id === user.roomId) {
-          room.users.push(user)
+          room.users.push(user);
         }
       }
     };
@@ -64,11 +73,11 @@ export default function Rooms() {
 
   // calculate total admins per room
   const checkTotalAdmins = (ri) => {
-    const usersInRoomCopy = [...usersInRoom]
-    const users = usersInRoomCopy[ri].users
-    let count = 0
+    const usersInRoomCopy = [...usersInRoom];
+    const users = usersInRoomCopy[ri].users;
+    let count = 0;
     for(const user of users) {
-      if (user.isAdmin) count += 1
+      if (user.isAdmin) count += 1;
     }
 
     return count;
@@ -77,23 +86,23 @@ export default function Rooms() {
   
   // Handle removing user 
   const removeUser = (e, ri, ui, isAdmin) => {
-    const usersInRoomCopy = [...usersInRoom]
-    const totalAdmins = checkTotalAdmins(ri)
+    const usersInRoomCopy = [...usersInRoom];
+    const totalAdmins = checkTotalAdmins(ri);
     if (!isAdmin || (isAdmin && totalAdmins >= 2)) {
       usersInRoomCopy[ri].users.splice(ui, 1);
       setUsersInRoom(usersInRoomCopy);
     } else 
-    setOpenSnackBar(true)
+    setOpenSnackBar(true);
 
     if (usersInRoomCopy[ri].users.length === totalAdmins) {
-      usersInRoomCopy[ri].isActive = false
-      setUsersInRoom(usersInRoomCopy)
+      usersInRoomCopy[ri].isActive = false;
+      setUsersInRoom(usersInRoomCopy);
 
     }
       
   }
 
-  // Handle close Snackbar (alert)
+  // Handle close Snackbars (alerts)
   const handleSnackBarClose = (event: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
@@ -108,23 +117,25 @@ export default function Rooms() {
     setOpenRoomSnackBar(false);
   };
 
+
+  // Room number changing for users
   const changeRoomNumber = (ri, ui, newNumber) => {
-    const usersInRoomCopy = [...usersInRoom]
+    const usersInRoomCopy = [...usersInRoom];
     if (validRoomIds.includes(newNumber) && newNumber !== usersInRoomCopy[ri].users[ui].roomId){
-      usersInRoomCopy[ri].users[ui].roomId = newNumber 
-      setUsersInRoom(usersInRoomCopy)
-      usersInRoomCopy[ri].users.splice(ui, 1)
+      usersInRoomCopy[ri].users[ui].roomId = newNumber; 
+      setUsersInRoom(usersInRoomCopy);
+      usersInRoomCopy[ri].users.splice(ui, 1);
       for(const room of usersInRoomCopy){
         if (newNumber === room.id) {
-          const newUser = usersInRoomCopy[ri].users[ui]
-          newUser.roomId = newNumber
-          room.users.unshift(newUser)
+          const newUser = usersInRoomCopy[ri].users[ui];
+          newUser.roomId = newNumber;
+          room.users.unshift(newUser);
         }
       }
-      setUsersInRoom(usersInRoomCopy)
+      setUsersInRoom(usersInRoomCopy);
     }
     else 
-      setOpenRoomSnackBar(true)
+      setOpenRoomSnackBar(true);
   } 
 
 
@@ -133,10 +144,10 @@ export default function Rooms() {
     <Grid container justifyContent="center">
       {usersInRoom?.map((room, ri) => (
         <Grid key={ri} item sx={{border: "1px solid black", width: "300px", borderRadius: "20px", margin: "10px"}}>
-          <Typography>Room ID: {room.id}</Typography>
+          <Typography sx={TypographyStyle}>Room ID: {room.id}</Typography>
           <BedIcon sx={{color: room.isActive ? "#00A67E" : "#CF142B", fontSize: "50px"}} />
-          <Typography>Number of Users: {room.users.length}</Typography>
-          {room.users.length > 0 && <Typography>Users' details: </Typography>}
+          <Typography sx={TypographyStyle}>Number of Users: {room.users.length}</Typography>
+          {room.users.length > 0 && <Typography sx={TypographyStyle}>Users' details: </Typography>}
           {room.users?.map((user, ui) => (
               <User key={ui} user={user} ri={ri} ui={ui} removeUser={removeUser} changeRoomNumber={changeRoomNumber} />
           ))}
